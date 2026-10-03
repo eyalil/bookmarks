@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmark Manager</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+    }
+
+    .form-card {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .bookmarks-section {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .bookmarks-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .bookmark-item {
+      background: #f9f9f9;
+      border-left: 4px solid #667eea;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      transition: box-shadow 0.2s;
+    }
+
+    .bookmark-item:hover {
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .bookmark-content {
+      flex: 1;
+    }
+
+    .bookmark-title {
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 1.1em;
+    }
+
+    .bookmark-url {
+      color: #667eea;
+      text-decoration: none;
+      word-break: break-all;
+      margin-bottom: 5px;
+      display: block;
+      font-size: 0.9em;
+    }
+
+    .bookmark-url:hover {
+      text-decoration: underline;
+    }
+
+    .bookmark-category {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      margin-right: 10px;
+    }
+
+    .bookmark-meta {
+      font-size: 0.85em;
+      color: #999;
+    }
+
+    .delete-btn {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.2s;
+      margin-left: 10px;
+      flex-shrink: 0;
+    }
+
+    .delete-btn:hover {
+      background: #ee5a52;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+    }
+
+    .empty-state p {
+      font-size: 1.1em;
+    }
+
+    .success-message {
+      background: #4caf50;
+      color: white;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .error-message {
+      background: #ff6b6b;
+      color: white;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .category-section {
+      margin-bottom: 35px;
+    }
+
+    .category-title {
+      font-size: 1.3em;
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+
+    .bookmarks-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .search-box {
+      margin-bottom: 25px;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 1em;
+      transition: border-color 0.3s;
+    }
+
+    #searchInput:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .no-results {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+      font-size: 1.1em;
+    }
+
+    .modal {
+      display: flex;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #333;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 2em;
+      cursor: pointer;
+      color: #999;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .btn-save, .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-cancel {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-cancel:hover {
+      background: #d0d0d0;
+    }
+
+    .edit-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background 0.2s;
+      margin-right: 8px;
+    }
+
+    .edit-btn:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📚 Bookmark Manager</h1>
+
+    <div class="form-card">
+      <div class="success-message" id="successMessage">Bookmark added successfully!</div>
+      <div class="error-message" id="errorMessage"></div>
+
+      <form id="bookmarkForm">
+        <div class="form-group">
+          <label for="url">URL</label>
+          <input type="url" id="url" name="url" placeholder="https://example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="title">Title</label>
+          <input type="text" id="title" name="title" placeholder="Enter bookmark title" required>
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category</label>
+          <select id="category" name="category" required>
+            <option value="">Select a category</option>
+            <option value="Work">Work</option>
+            <option value="Learning">Learning</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Shopping">Shopping</option>
+            <option value="News">News</option>
+            <option value="Tools">Tools</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <button type="submit">Add Bookmark</button>
+      </form>
+    </div>
+
+    <div class="bookmarks-section">
+      <h2>Your Bookmarks</h2>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Search bookmarks...">
+      </div>
+
+      <div id="bookmarksList">
+        <div class="empty-state">
+          <p>No bookmarks yet. Add your first bookmark above!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Edit Bookmark</h2>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+
+      <form id="editForm">
+        <div class="form-group">
+          <label for="editUrl">URL</label>
+          <input type="url" id="editUrl" required>
+        </div>
+
+        <div class="form-group">
+          <label for="editTitle">Title</label>
+          <input type="text" id="editTitle" required>
+        </div>
+
+        <div class="form-group">
+          <label for="editCategory">Category</label>
+          <select id="editCategory" required>
+            <option value="">Select a category</option>
+            <option value="Work">Work</option>
+            <option value="Learning">Learning</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Shopping">Shopping</option>
+            <option value="News">News</option>
+            <option value="Tools">Tools</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="modal-buttons">
+          <button type="submit" class="btn-save">Save Changes</button>
+          <button type="button" class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'bookmarks';
+
+    function getBookmarks() {
+      const data = localStorage.getItem(STORAGE_KEY);
+      let bookmarks = data ? JSON.parse(data) : [];
+
+      // Check if any bookmarks need migration (don't have valid IDs)
+      const needsMigration = bookmarks.some(b => !b.id || typeof b.id !== 'number' || isNaN(b.id));
+
+      if (needsMigration) {
+        console.log('Running migration to fix bookmark IDs');
+        const baseTime = Date.now();
+        bookmarks = bookmarks.map((bookmark, index) => {
+          if (!bookmark.id || typeof bookmark.id !== 'number' || isNaN(bookmark.id)) {
+            // Only assign new ID if it's truly missing or invalid
+            bookmark.id = baseTime + index;
+            console.log('Fixed bookmark ID:', bookmark.id);
+          }
+          return bookmark;
+        });
+        // Save the migrated bookmarks immediately
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
+      }
+
+      console.log('Loaded bookmarks:', bookmarks);
+      return bookmarks;
+    }
+
+    function saveBookmarks(bookmarks) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(bookmarks));
+    }
+
+    function loadBookmarks() {
+      displayBookmarks('');
+    }
+
+    function displayBookmarks(searchTerm = '') {
+      const bookmarksList = document.getElementById('bookmarksList');
+      let bookmarks = getBookmarks();
+
+      console.log('Displaying bookmarks with search term:', searchTerm);
+      console.log('Total bookmarks:', bookmarks.length);
+
+      // Filter bookmarks based on search term
+      if (searchTerm) {
+        bookmarks = bookmarks.filter(bookmark =>
+          (bookmark.title && bookmark.title.toLowerCase().includes(searchTerm)) ||
+          (bookmark.url && bookmark.url.toLowerCase().includes(searchTerm)) ||
+          (bookmark.category && bookmark.category.toLowerCase().includes(searchTerm))
+        );
+        console.log('Filtered bookmarks:', bookmarks.length);
+      }
+
+      if (bookmarks.length === 0) {
+        if (searchTerm) {
+          bookmarksList.innerHTML = '<div class="no-results">No bookmarks match your search</div>';
+        } else {
+          bookmarksList.innerHTML = '<div class="empty-state"><p>No bookmarks yet. Add your first bookmark above!</p></div>';
+        }
+        return;
+      }
+
+      // Group bookmarks by category
+      const grouped = bookmarks.reduce((acc, bookmark) => {
+        const category = bookmark.category || 'Uncategorized';
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(bookmark);
+        return acc;
+      }, {});
+
+      // Sort categories alphabetically
+      const sortedCategories = Object.keys(grouped).sort();
+
+      // Generate HTML for each category
+      bookmarksList.innerHTML = sortedCategories.map(category => `
+        <div class="category-section">
+          <h3 class="category-title">${escapeHtml(category)}</h3>
+          <div class="bookmarks-group">
+            ${grouped[category].map(bookmark => `
+              <div class="bookmark-item">
+                <div class="bookmark-content">
+                  <div class="bookmark-title">${escapeHtml(bookmark.title)}</div>
+                  <a href="${escapeHtml(bookmark.url)}" class="bookmark-url" target="_blank">${escapeHtml(bookmark.url)}</a>
+                  <div class="bookmark-meta">Added ${formatDate(bookmark.createdAt)}</div>
+                </div>
+                <div style="display: flex;">
+                  <button class="edit-btn" onclick="openEditModal('${bookmark.id || ''}')">Edit</button>
+                  <button class="delete-btn" onclick="deleteBookmark('${bookmark.id || ''}')">Delete</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteBookmark(id) {
+      try {
+        if (!confirm('Are you sure you want to delete this bookmark?')) return;
+
+        if (!id) {
+          showError('Invalid bookmark ID');
+          return;
+        }
+
+        let bookmarks = getBookmarks();
+        // Handle both string and number IDs
+        const numId = typeof id === 'string' ? parseInt(id, 10) : id;
+
+        if (isNaN(numId)) {
+          showError('Invalid bookmark ID');
+          return;
+        }
+
+        bookmarks = bookmarks.filter(b => b.id !== numId);
+        saveBookmarks(bookmarks);
+
+        // Refresh display while maintaining search
+        const searchInput = document.getElementById('searchInput');
+        const currentSearch = searchInput.value.toLowerCase();
+        displayBookmarks(currentSearch);
+      } catch (error) {
+        console.error('Error deleting bookmark:', error);
+        showError('Error deleting bookmark');
+      }
+    }
+
+    function showError(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+      setTimeout(() => errorMessage.classList.remove('show'), 3000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    let currentEditId = null;
+
+    function openEditModal(id) {
+      try {
+        const bookmarks = getBookmarks();
+        console.log('Opening edit modal for ID:', id, 'Type:', typeof id);
+
+        if (!id) {
+          showError('Invalid bookmark ID');
+          return;
+        }
+
+        // Handle both string and number IDs
+        const numId = typeof id === 'string' ? parseInt(id, 10) : id;
+
+        if (isNaN(numId)) {
+          console.error('Invalid ID format:', id);
+          showError('Invalid bookmark ID');
+          return;
+        }
+
+        const bookmark = bookmarks.find(b => b.id === numId);
+
+        if (!bookmark) {
+          console.error('Bookmark not found. Looking for:', numId, 'Available IDs:', bookmarks.map(b => b.id));
+          showError('Bookmark not found');
+          return;
+        }
+
+        currentEditId = numId;
+        document.getElementById('editUrl').value = bookmark.url || '';
+        document.getElementById('editTitle').value = bookmark.title || '';
+        document.getElementById('editCategory').value = bookmark.category || '';
+
+        document.getElementById('editModal').classList.remove('hidden');
+      } catch (error) {
+        console.error('Error opening edit modal:', error);
+        showError('Error opening bookmark editor');
+      }
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.add('hidden');
+      currentEditId = null;
+    }
+
+    function init() {
+      const form = document.getElementById('bookmarkForm');
+      const bookmarksList = document.getElementById('bookmarksList');
+      const successMessage = document.getElementById('successMessage');
+      const errorMessage = document.getElementById('errorMessage');
+      const searchInput = document.getElementById('searchInput');
+      const editForm = document.getElementById('editForm');
+
+      // Load initial bookmarks
+      loadBookmarks();
+
+      // Form submission
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const url = document.getElementById('url').value;
+        const title = document.getElementById('title').value;
+        const category = document.getElementById('category').value;
+
+        if (!url || !title || !category) {
+          showError('Please fill in all fields');
+          return;
+        }
+
+        const bookmarks = getBookmarks();
+        const newBookmark = {
+          id: Date.now(),
+          url,
+          title,
+          category,
+          createdAt: new Date().toISOString()
+        };
+
+        bookmarks.push(newBookmark);
+        saveBookmarks(bookmarks);
+
+        form.reset();
+        searchInput.value = '';
+        successMessage.classList.add('show');
+        setTimeout(() => successMessage.classList.remove('show'), 3000);
+        loadBookmarks();
+      });
+
+      // Edit form submission
+      editForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const url = document.getElementById('editUrl').value;
+        const title = document.getElementById('editTitle').value;
+        const category = document.getElementById('editCategory').value;
+
+        if (!url || !title || !category) {
+          showError('Please fill in all fields');
+          return;
+        }
+
+        let bookmarks = getBookmarks();
+        const index = bookmarks.findIndex(b => b.id === currentEditId);
+
+        if (index === -1) {
+          showError('Bookmark not found');
+          return;
+        }
+
+        bookmarks[index] = {
+          ...bookmarks[index],
+          url,
+          title,
+          category
+        };
+
+        saveBookmarks(bookmarks);
+        closeEditModal();
+        successMessage.classList.add('show');
+        successMessage.textContent = 'Bookmark updated successfully!';
+        setTimeout(() => successMessage.classList.remove('show'), 3000);
+        loadBookmarks();
+      });
+
+      // Search as user types
+      searchInput.addEventListener('input', (e) => {
+        console.log('Search input:', e.target.value);
+        const searchTerm = e.target.value.toLowerCase();
+        displayBookmarks(searchTerm);
+      });
+
+      // Close modal when clicking outside
+      document.getElementById('editModal').addEventListener('click', (e) => {
+        if (e.target.id === 'editModal') {
+          closeEditModal();
+        }
+      });
+    }
+
+    // Initialize when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  </script>
+</body>
+</html>
